@@ -1,5 +1,5 @@
 // Çevrimdışı çalışma için basit önbellek. index.html'i güncellediğinizde sürüm numarasını artırın.
-const CACHE = "bebek-liste-v2";
+const CACHE = "bebek-liste-v1";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
