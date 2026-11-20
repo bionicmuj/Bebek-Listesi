@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6efe9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bebek Listesi">
+<title>Bebek Listesi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#f6efe9; --card:#fffdfb; --ink:#2d2a28; --muted:#7c736c; --line:#e8ddd3;
+  --accent:#c9725b; --ok:#4f8a67; --ok-bg:#e3f0e7; --warn:#b5793a; --warn-bg:#f8ead9;
+  --g:#a24e3a; --g-bg:#f6dfd8; --t:#5a6b8c; --t-bg:#e2e7f1;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#1d1a18; --card:#272320; --ink:#f1ebe6; --muted:#a79d95; --line:#3a3430;
+  --accent:#e08e76; --ok:#7cc497; --ok-bg:#24372b; --warn:#e2aa6e; --warn-bg:#3b2e20;
+  --g:#f0a58f; --g-bg:#43281f; --t:#a9b8d8; --t-bg:#262d3c; }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(env(safe-area-inset-top) + 12px) 16px 8px;border-bottom:1px solid var(--line)}
+h1{font-size:22px;margin:0 0 6px;display:flex;justify-content:space-between;align-items:center}
+h1 button{font-size:20px;background:none;border:0;color:var(--muted);padding:4px 8px}
+.prog{font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:6px 0 10px}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:20px;font-size:14px;white-space:nowrap}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip small{opacity:.75;margin-left:4px}
+.seg{display:flex;background:var(--line);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:none;color:var(--ink);padding:7px 0;border-radius:8px;font-size:14px}
+.seg button.on{background:var(--card);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+main{padding:12px 16px calc(env(safe-area-inset-bottom) + 90px)}
+.cat-title{font-size:15px;font-weight:700;margin:18px 2px 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.cat-tip{font-size:13px;color:var(--muted);margin:-4px 2px 10px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;display:flex;gap:10px;align-items:center}
+.item.done{border-color:var(--ok)}
+.info{flex:1;min-width:0}
+.name{font-weight:600;font-size:16px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;font-size:12px;align-items:center}
+.tag{padding:2px 8px;border-radius:10px;font-weight:600}
+.tag.g{background:var(--g-bg);color:var(--g)} .tag.t{background:var(--t-bg);color:var(--t)}
+.st{padding:2px 8px;border-radius:10px}
+.st.ok{background:var(--ok-bg);color:var(--ok)} .st.miss{background:var(--warn-bg);color:var(--warn)}
+.note{font-size:13px;color:var(--muted);margin-top:5px}
+.ctr{display:flex;align-items:center;gap:4px}
+.ctr button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:22px;line-height:1}
+.ctr span{min-width:26px;text-align:center;font-size:18px;font-weight:700}
+.del{border:0;background:none;color:var(--muted);font-size:18px;padding:0 0 0 2px;align-self:flex-start}
+.add{display:block;width:100%;border:1px dashed var(--line);background:none;color:var(--muted);padding:12px;border-radius:14px;font-size:15px}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+dialog{border:0;border-radius:16px;padding:20px;width:min(92vw,420px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog h2{margin:0 0 12px;font-size:18px}
+dialog label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+dialog input,dialog select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:var(--bg);color:var(--ink)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btns{display:flex;gap:10px;margin-top:16px}
+.btns button,.menu button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:15px}
+.btns .pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.menu{display:flex;flex-direction:column;gap:10px}
+.menu p{font-size:13px;color:var(--muted);margin:0}
+.danger{color:#c0392b!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>👶 Bebek Listesi <button id="menuBtn" aria-label="Menü">⚙️</button></h1>
+  <div class="prog"><span id="progTxt"></span><span id="progPct"></span></div>
+  <div class="bar"><i id="progBar"></i></div>
+  <div class="chips" id="chips"></div>
+  <div class="seg" id="seg">
+    <button data-f="all" class="on">Hepsi</button>
+    <button data-f="g">Gerekli</button>
+    <button data-f="miss">Eksikler</button>
+  </div>
+</header>
+<main id="list"></main>
+
+<dialog id="addDlg">
+  <form method="dialog" id="addForm">
+    <h2>Ürün ekle</h2>
+    <label>Ürün adı</label><input id="fName" required>
+    <div class="row">
+      <div><label>En az adet</label><input id="fMin" type="number" min="0" value="1" inputmode="numeric"></div>
+      <div><label>Öneri (ör. 2–3)</label><input id="fTarget" placeholder="1"></div>
+    </div>
+    <label>Önem</label>
+    <select id="fPri"><option value="g">Gerekli</option><option value="t">Tercihen</option></select>
+    <label>Not (isteğe bağlı)</label><input id="fNote">
+    <div class="btns"><button value="cancel" formnovalidate>Vazgeç</button><button class="pri" value="ok">Ekle</button></div>
+  </form>
+</dialog>
+
+<dialog id="menuDlg">
+  <form method="dialog" class="menu">
+    <h2>Ayarlar</h2>
+    <p>Liste sadece bu telefonda saklanır. Telefon değiştirirken ya da eşinize aktarırken yedek dosyası kullanın.</p>
+    <button type="button" id="expBtn">📤 Yedeği kopyala</button>
+    <button type="button" id="impBtn">📥 Yedekten yükle</button>
+    <button type="button" id="showHidden">↩️ Çıkarılan ürünleri geri getir</button>
+    <button type="button" id="resetBtn" class="danger">🗑️ Sayıları sıfırla</button>
+    <button value="close">Kapat</button>
+  </form>
+</dialog>
+
+<dialog id="bakDlg">
+  <form method="dialog" class="menu">
+    <h2 id="bakTitle">Yedek</h2>
+    <p id="bakHelp"></p>
+    <textarea id="bakTxt" rows="7" style="width:100%;font:12px monospace;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)"></textarea>
+    <p id="bakMsg" style="color:var(--accent)"></p>
+    <div class="btns"><button value="close">Kapat</button><button type="button" class="pri" id="bakAct"></button></div>
+  </form>
+</dialog>
+
+<dialog id="askDlg">
+  <form method="dialog">
+    <h2 id="askTxt"></h2>
+    <div class="btns"><button value="no">Vazgeç</button><button class="pri" value="yes">Evet</button></div>
+  </form>
+</dialog>
+
+<script>
+// [id, ad, öneri, en az, önem g=gerekli t=tercihen, not, başlangıç adedi]
+const CATS = [
+ {id:"yd", name:"Yenidoğan (0–1 ay)", tip:"Şubat doğumu: hepsi uzun kollu, pamuklu. Az alın, bu beden hızlı geçilir.", items:[
+  ["yd1","Uzun kollu zıbın","6–8",6,"g","Önden bağlamalı/kimono tipi; göbek bağı düşene kadar rahat",6],
+  ["yd2","Tulum","5–6",5,"g","Ağı çıtçıtlı olsun, bez değişimi kolay olur",5],
+  ["yd3","Hırka","2",2,"g","",0],
+  ["yd4","Pamuklu şapka","2–3",2,"g","Uyurken takmayın",0],
+  ["yd5","Tırnak eldiveni","2–3",2,"g","",0],
+  ["yd6","Çorap / patik","5–6 çift",5,"g","",5],
+  ["yd7","Müslin / kundak örtüsü","3–4",3,"g","",0],
+  ["yd8","Battaniye","2",2,"g","Araba koltuğunda kemerin üstüne örtün",1],
+  ["yd9","Kozmonot","1",1,"g","Araba koltuğunda giydirmeyin, kemer oturmaz",1]]},
+ {id:"a13", name:"1–3 ay (Mart–Mayıs)", tip:"İlkbahar: çoğu uzun kollu, kat kat giydirmeye uygun.", items:[
+  ["a131","Body (çoğu uzun kollu)","7–8",7,"g","",7],
+  ["a132","Tulum","6–7",6,"g","",0],
+  ["a133","Hırka","2",2,"g","",0],
+  ["a134","İnce mont / kozmonot","1",1,"g","",0],
+  ["a135","Şapka","2",2,"g","",0],
+  ["a136","Çorap","6 çift",6,"g","",0]]},
+ {id:"a36", name:"3–6 ay (Mayıs–Ağustos)", tip:"Yaz: kısa kollu ve askılı ağırlıklı.", items:[
+  ["a361","Kısa kollu / askılı body","7–8",7,"g","",0],
+  ["a362","Uzun kollu body","2–3",2,"g","Serin akşamlar ve klima için",0],
+  ["a363","İnce tulum / şortlu takım","5–6",5,"g","",0],
+  ["a364","İnce hırka","1",1,"g","",0],
+  ["a365","Güneş şapkası","1–2",1,"g","",0]]},
+ {id:"a69", name:"6–9 ay (Ağustos–Kasım)", tip:"Sonbahar ve emekleme dönemi.", items:[
+  ["a691","Uzun kollu body","6–7",6,"g","",0],
+  ["a692","Alt-üst takım / pantolon","5–6",5,"g","Dizleri sağlam olsun, emekleme başlar",0],
+  ["a693","Hırka / sweat","2–3",2,"g","",0],
+  ["a694","Mont","1",1,"g","",0],
+  ["a695","Çorap","6 çift",6,"g","",0],
+  ["a696","Şapka","1–2",1,"g","",0]]},
+ {id:"uy", name:"Uyku", tip:"Güvenli uyku: sert ve düz yatak, sırtüstü yatırın, yatakta yastık, yorgan ve oyuncak olmasın.", items:[
+  ["uy1","Beşik veya park yatak","1",1,"g","İlk 6 ay sizin odanızda olması önerilir",0],
+  ["uy2","Beşik yatağı (sert, tam oturan)","1",1,"g","Kenarda boşluk kalmasın",0],
+  ["uy3","Lastikli çarşaf","3",3,"g","",0],
+  ["uy4","Uyku tulumu (kışlık)","2",2,"g","Battaniyeden daha güvenli, üstünü açamaz",0],
+  ["uy5","Oda termometresi","1",1,"t","Oda 20–22°C ideal",0],
+  ["uy6","Anne yanı beşik","1",1,"t","Gece emzirmeyi kolaylaştırır",0],
+  ["uy7","Bebek kamerası / telsizi","1",1,"t","",0],
+  ["uy8","Loş gece lambası","1",1,"t","",0]]},
+ {id:"bz", name:"Bez ve alt değiştirme", tip:"Bez numarası kiloya göre hızlı değişir, büyük stok yapmayın.", items:[
+  ["bz1","Yenidoğan bezi (1 numara)","2–3 paket",2,"g","",0],
+  ["bz2","2 numara bez","2 paket",2,"g","Doğum kilosuna göre ilk haftalarda geçilebilir",0],
+  ["bz3","Pamuk","2 paket",2,"g","İlk haftalarda ılık su + pamuk en naziği",0],
+  ["bz4","Islak mendil (parfümsüz)","3–4 paket",3,"g","",0],
+  ["bz5","Pişik kremi","1",1,"g","",0],
+  ["bz6","Alt açma minderi","1–2",1,"g","Biri çantada dursun",0],
+  ["bz7","Alt açma ünitesi / şifonyer","1",1,"t","Bel ağrısını azaltır",0],
+  ["bz8","Kapaklı bez çöp kovası","1",1,"t","",0]]},
+ {id:"bn", name:"Banyo ve bakım", tip:"Göbek bağı düşene kadar silerek temizlik yeterli.", items:[
+  ["bn1","Bebek küveti","1",1,"g","",0],
+  ["bn2","Kapüşonlu havlu","2",2,"g","",0],
+  ["bn3","Bebek şampuanı / yıkama jeli","1",1,"g","",0],
+  ["bn4","Bebek tırnak makası veya törpüsü","1",1,"g","",0],
+  ["bn5","Parfümsüz bebek deterjanı","1",1,"g","Yeni kıyafetleri giydirmeden önce yıkayın",0],
+  ["bn6","Banyo termometresi","1",1,"t","Su 37°C civarı; dirseğinizle de kontrol edin",0],
+  ["bn7","Küvet filesi / banyo yatağı","1",1,"t","İlk banyolarda elinizi rahatlatır",0],
+  ["bn8","Yumuşak bebek tarağı / fırçası","1",1,"t","",0]]},
+ {id:"bs", name:"Beslenme", tip:"Ek gıda 6. ayda başlar; o kalemleri sonra alabilirsiniz.", items:[
+  ["bs1","Ağız mendili / tülbent","6–8",6,"g","Gaz çıkarırken omuza",0],
+  ["bs2","Göğüs pedi (anne için)","2 kutu",2,"g","",0],
+  ["bs3","Biberon","2",2,"t","Emzirseniz de acil durum için iyi olur",0],
+  ["bs4","Biberon fırçası","1",1,"t","",0],
+  ["bs5","Emzirme yastığı","1",1,"t","",0],
+  ["bs6","Meme ucu kremi (lanolin)","1",1,"t","",0],
+  ["bs7","Göğüs pompası","1",1,"t","Gerekirse doğumdan sonra da alınabilir",0],
+  ["bs8","Sterilizatör","1",1,"t","Kaynatarak da steril edilebilir",0],
+  ["bs9","Emzik","2",2,"t","",0],
+  ["bs10","Mama sandalyesi (6. ay)","1",1,"g","",0],
+  ["bs11","Mama önlüğü (6. ay)","4",4,"g","",0],
+  ["bs12","Silikon kaşık ve kase (6. ay)","2",2,"g","",0]]},
+ {id:"ds", name:"Dışarı çıkma ve yolculuk", tip:"Ana kucağı hastaneden eve dönüşte gerekli; doğumdan önce alın.", items:[
+  ["ds1","Ana kucağı / araç koltuğu (0+, i-Size)","1",1,"g","İkinci el almayın; arabaya takmayı önceden deneyin",0],
+  ["ds2","Bebek arabası (tam yatar / port-bebe)","1",1,"g","Yenidoğan düz yatmalı",0],
+  ["ds3","Puset kış örtüsü / ayak tulumu","1",1,"g","Şubat soğuğu için",0],
+  ["ds4","Bebek bakım çantası","1",1,"g","",0],
+  ["ds5","Puset yağmurluğu","1",1,"t","",0],
+  ["ds6","Ergonomik kanguru / sling","1",1,"t","Kalça M pozisyonunda olsun",0],
+  ["ds7","Puset güneşliği / cibinlik","1",1,"t","Yaz ayları için",0]]},
+ {id:"sg", name:"Sağlık", tip:"3 aydan küçük bebekte ateş 38°C ve üstüyse beklemeden doktora başvurun.", items:[
+  ["sg1","Dijital termometre","1",1,"g","",0],
+  ["sg2","Burun aspiratörü","1",1,"g","",0],
+  ["sg3","Serum fizyolojik (damla / sprey)","2",2,"g","",0],
+  ["sg4","Soğuk buhar nemlendirici","1",1,"t","Kaloriferli kış günlerinde burun tıkanıklığına iyi gelir",0]]}
+];
+
+const KEY="bebek-liste-v1";
+let S={have:{},custom:[],hidden:[]};
+try{const s=JSON.parse(localStorage.getItem(KEY)); if(s) S=Object.assign(S,s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+let curCat="all", filt="all";
+const allItems=()=>{
+  const out=[];
+  CATS.forEach(c=>{
+    c.items.forEach(a=>out.push({id:a[0],name:a[1],target:a[2],min:a[3],pri:a[4],note:a[5],init:a[6],cat:c.id}));
+    S.custom.filter(x=>x.cat===c.id).forEach(x=>out.push(Object.assign({custom:true,init:0},x)));
+  });
+  return out.filter(i=>!S.hidden.includes(i.id));
+};
+const have=i=> (i.id in S.have)? S.have[i.id] : i.init;
+
+function render(){
+  const items=allItems();
+  // ilerleme: gerekli kalemler
+  const req=items.filter(i=>i.pri==="g");
+  const done=req.filter(i=>have(i)>=i.min).length;
+  const pct=req.length?Math.round(done/req.length*100):0;
+  document.getElementById("progTxt").textContent=`Gerekliler: ${done}/${req.length} tamam`;
+  document.getElementById("progPct").textContent=`%${pct}`;
+  document.getElementById("progBar").style.width=pct+"%";
+
+  // kategori çipleri
+  const chips=document.getElementById("chips");
+  const missIn=cid=>items.filter(i=>i.cat===cid&&i.pri==="g"&&have(i)<i.min).length;
+  chips.innerHTML=`<button class="chip ${curCat==="all"?"on":""}" data-c="all">Tümü</button>`+
+    CATS.map(c=>{const m=missIn(c.id);return `<button class="chip ${curCat===c.id?"on":""}" data-c="${c.id}">${c.name.split(" (")[0]}${m?`<small>${m}</small>`:" ✓"}</button>`}).join("");
+
+  const list=document.getElementById("list");
+  let html="";
+  CATS.forEach(c=>{
+    if(curCat!=="all"&&curCat!==c.id) return;
+    let its=items.filter(i=>i.cat===c.id);
+    if(filt==="g") its=its.filter(i=>i.pri==="g");
+    if(filt==="miss") its=its.filter(i=>have(i)<i.min);
+    if(!its.length && filt!=="all") return;
+    html+=`<div class="cat-title">${c.name}</div><div class="cat-tip">${c.tip}</div>`;
+    its.forEach(i=>{
+      const h=have(i), ok=h>=i.min, miss=i.min-h;
+      html+=`<div class="item ${ok?"done":""}">
+        <div class="info">
+          <div class="name">${esc(i.name)}</div>
+          <div class="meta">
+            <span class="tag ${i.pri}">${i.pri==="g"?"Gerekli":"Tercihen"}</span>
+            <span>Öneri: ${esc(i.target)}</span>
+            <span class="st ${ok?"ok":"miss"}">${ok?"✓ Tamam":"Eksik: "+miss}</span>
+          </div>
+          ${i.note?`<div class="note">${esc(i.note)}</div>`:""}
+        </div>
+        <div class="ctr">
+          <button data-d="-1" data-id="${i.id}" aria-label="Azalt">−</button>
+          <span>${h}</span>
+          <button data-d="1" data-id="${i.id}" aria-label="Artır">+</button>
+        </div>
+        <button class="del" data-x="${i.id}" aria-label="Listeden çıkar">×</button>
+      </div>`;
+    });
+    if(filt==="all") html+=`<button class="add" data-add="${c.id}">+ ${c.name.split(" (")[0]} için ürün ekle</button>`;
+  });
+  list.innerHTML=html||`<div class="empty">🎉 Burada eksik bir şey kalmadı.</div>`;
+}
+let askCb=null;
+function ask(msg,cb){ askCb=cb; document.getElementById("askTxt").textContent=msg; document.getElementById("askDlg").showModal(); }
+document.getElementById("askDlg").addEventListener("close",e=>{ if(e.target.returnValue==="yes"&&askCb) askCb(); askCb=null; });
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
+
+document.getElementById("chips").onclick=e=>{const b=e.target.closest("[data-c]"); if(!b)return; curCat=b.dataset.c; render(); scrollTo({top:0});};
+document.getElementById("seg").onclick=e=>{const b=e.target.closest("button"); if(!b)return; filt=b.dataset.f;
+  document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x===b)); render();};
+
+let addCat=null;
+document.getElementById("list").onclick=e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.d){ const it=allItems().find(i=>i.id===b.dataset.id);
+    S.have[it.id]=Math.max(0,have(it)+(+b.dataset.d)); save(); render(); if(navigator.vibrate) navigator.vibrate(8); }
+  else if(b.dataset.x){ const it=allItems().find(i=>i.id===b.dataset.x);
+    ask(`"${it.name}" listeden çıkarılsın mı?`,()=>{
+      if(it.custom) S.custom=S.custom.filter(x=>x.id!==it.id); else S.hidden.push(it.id);
+      save(); render(); }); }
+  else if(b.dataset.add){ addCat=b.dataset.add; document.getElementById("addForm").reset(); document.getElementById("addDlg").showModal(); }
+};
+document.getElementById("addDlg").addEventListener("close",e=>{
+  if(e.target.returnValue!=="ok") return;
+  const name=document.getElementById("fName").value.trim(); if(!name) return;
+  const min=Math.max(0,parseInt(document.getElementById("fMin").value)||0);
+  S.custom.push({id:"c"+Date.now(),cat:addCat,name,min,target:document.getElementById("fTarget").value.trim()||String(min),
+    pri:document.getElementById("fPri").value,note:document.getElementById("fNote").value.trim()});
+  save(); render();
+});
+
+// menü
+const md=document.getElementById("menuDlg");
+document.getElementById("menuBtn").onclick=()=>md.showModal();
+const bd=document.getElementById("bakDlg"), bt=document.getElementById("bakTxt"), bm=document.getElementById("bakMsg"), ba=document.getElementById("bakAct");
+let bakMode="";
+document.getElementById("expBtn").onclick=()=>{
+  bakMode="exp"; md.close();
+  document.getElementById("bakTitle").textContent="Yedeği kopyala";
+  document.getElementById("bakHelp").textContent="Bu metni kopyalayıp WhatsApp ya da not ile kendinize veya eşinize gönderin.";
+  bt.value=JSON.stringify(S); bt.readOnly=true; bm.textContent=""; ba.textContent="Kopyala"; bd.showModal();
+};
+document.getElementById("impBtn").onclick=()=>{
+  bakMode="imp"; md.close();
+  document.getElementById("bakTitle").textContent="Yedekten yükle";
+  document.getElementById("bakHelp").textContent="Kopyaladığınız yedek metnini aşağıya yapıştırın. Bu telefondaki liste onunla değişir.";
+  bt.value=""; bt.readOnly=false; bm.textContent=""; ba.textContent="Yükle"; bd.showModal();
+};
+ba.onclick=async()=>{
+  if(bakMode==="exp"){
+    try{ await navigator.clipboard.writeText(bt.value); bm.textContent="Kopyalandı ✓"; }
+    catch(e){ bt.focus(); bt.select(); bm.textContent="Metin seçildi, uzun basıp kopyalayın."; }
+  } else {
+    try{ const d=JSON.parse(bt.value.trim()); if(!d.have) throw 0;
+      S=Object.assign({have:{},custom:[],hidden:[]},d); save(); render(); bd.close(); }
+    catch(x){ bm.textContent="Bu metin okunamadı, tamamını yapıştırdığınızdan emin olun."; }
+  }
+};
+document.getElementById("showHidden").onclick=()=>{ S.hidden=[]; save(); render(); md.close(); };
+document.getElementById("resetBtn").onclick=()=>{ md.close(); ask("Tüm sayılar sıfırlansın mı? Eklediğiniz ürünler kalır.",()=>{ S.have={}; CATS.forEach(c=>c.items.forEach(a=>S.have[a[0]]=0)); save(); render(); }); };
+
+render();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
